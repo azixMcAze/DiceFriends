@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012, Mathieu Le Ber
+Copyright (c) 2012, azixMcAze
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@ either expressed or implied, of the FreeBSD Project.
 /*
 * DiceFriends, a plugin for Better Battlelog that adds the playing Dice employees to your comcenter.
 *
-* @author Mathieu Le Ber
+* @author azixMcAze
 * @version 1.0.1
 * @date 03.07.2012
 * @url https://github.com/azixMcAze/DiceFriends
@@ -338,7 +338,7 @@ DiceFriendsPlugin = {
 	makeLocalizedUrl : function(path)
 	{
 		var url = "";
-		if(Surface.urlContext._language != 'en')
+		if(Surface.urlContext._language != null && Surface.urlContext._language != 'en')
 			url = '/bf3/' + Surface.urlContext._language + path;
 		else
 			url = '/bf3' + path;
