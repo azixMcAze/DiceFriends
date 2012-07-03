@@ -39,7 +39,7 @@ either expressed or implied, of the FreeBSD Project.
 DiceFriendsPlugin = {
 	playerList : [],
 	updateInterval : 60*5,
-	dicePlatoon : "http://battlelog.battlefield.com/bf3/platoon/2832655391300702826/listmembers/",
+	dicePlatoon : "/platoon/2832655391300702826/listmembers/",
 	showingDiceFriends : true,
 	
 	init : function()
@@ -93,8 +93,13 @@ DiceFriendsPlugin = {
 	update : function()
 	{
 		this.playerList = [];
+		var url = ""
+		if(Surface.urlContext._language != 'en')
+			url = '/bf3/' + Surface.urlContext._language + this.dicePlatoon;
+		else
+			url = '/bf3' + this.dicePlatoon;
 		
-		BBLog.getJSONFromBattlelog(this.dicePlatoon, function(json){
+		BBLog.getJSONFromBattlelog(url, function(json){
 			DiceFriendsPlugin.parsePlatoonMembers(json);
 			DiceFriendsPlugin.displayPlayerList();
 		});
@@ -320,7 +325,7 @@ DiceFriendsPlugin = {
 				
 				this.playerList.push(player);
 				var self = this;
-				BBLog.getJSONFromBattlelog("http://battlelog.battlefield.com/bf3/user/overviewBoxStats/"+ player.userId +"/", function() {
+				BBLog.getJSONFromBattlelog("/bf3/user/overviewBoxStats/"+ player.userId +"/", function() {
 						var p = player;
 						return function(json)
 						{
