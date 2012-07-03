@@ -32,8 +32,10 @@ either expressed or implied, of the FreeBSD Project.
 *
 * @author Mathieu Le Ber
 * @version 1.0.1
-* @date 30.06.2012
+* @date 03.07.2012
 * @url https://github.com/azixMcAze/DiceFriends
+*
+* Released under the BSD License.
 */
 
 DiceFriendsPlugin = {
@@ -93,13 +95,8 @@ DiceFriendsPlugin = {
 	update : function()
 	{
 		this.playerList = [];
-		var url = ""
-		if(Surface.urlContext._language != 'en')
-			url = '/bf3/' + Surface.urlContext._language + this.dicePlatoon;
-		else
-			url = '/bf3' + this.dicePlatoon;
-		
-		BBLog.getJSONFromBattlelog(url, function(json){
+
+		BBLog.getJSONFromBattlelog(this.makeLocalizedUrl(this.dicePlatoon), function(json){
 			DiceFriendsPlugin.parsePlatoonMembers(json);
 			DiceFriendsPlugin.displayPlayerList();
 		});
@@ -153,26 +150,26 @@ DiceFriendsPlugin = {
 					)
 				)).append(
 				$('<div>').addClass('comcenter-username').append(
-					$('<a>').addClass('comcenter-username-link').attr('href', '/bf3/user/'+ player.name +'/')
+					$('<a>').addClass('comcenter-username-link').attr('href', this.makeLocalizedUrl('/user/'+ player.name +'/'))
 						.text(player.name)).append(
 					$('<div>').addClass('comcenter-username-serverinfo').append(
 						$('<div>').addClass('base-left').append(
 							$('<span>').addClass('common-playing-link').append(
 								$('<a>').attr('title', player.serverName)
-										.addClass('common-playing-link base-no-ajax comcenter-playing-link').attr('href','/bf3/servers/show/'+ player.serverGuid +'/')
+										.addClass('common-playing-link base-no-ajax comcenter-playing-link').attr('href', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'))
 										.text(player.serverName)
 							)
 						)
 					)
 				)).append(
 				$('<div>').addClass('comcenter-interact-container').append(
-					$('<form>').addClass('join-friend').attr('method', 'POST').attr('action', '/bf3/servers/show/'+ player.serverGuid +'/').append(
+					$('<form>').addClass('join-friend').attr('method', 'POST').attr('action', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/')).append(
 						$('<input>').attr('type', 'hidden').attr('name', 'game').attr('value', 2)).append(
 						$('<input>').attr('type', 'hidden').attr('name', 'guid').attr('value', player.serverGuid)).append(
 						$('<div>').attr('title', 'Join Game').addClass('bubble-title-left join-friend-submit-link comcenter-interact-playing')
 					)).append(
 					$('<a>').attr('title', '')
-							.attr('href', 'http://battlelog.battlefield.com/bf3/soldier/' + player.name + '/dogtags/' + player.personaId + '/')
+							.attr('href', this.makeLocalizedUrl('/soldier/' + player.name + '/dogtags/' + player.personaId + '/'))
 							.addClass('bubble-title-left comcenter-interact-dogtag-parent').append(
 						$('<span>').addClass('comcenter-interact-dogtag-icon')
 					)
@@ -325,7 +322,7 @@ DiceFriendsPlugin = {
 				
 				this.playerList.push(player);
 				var self = this;
-				BBLog.getJSONFromBattlelog("/bf3/user/overviewBoxStats/"+ player.userId +"/", function() {
+				BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/user/overviewBoxStats/'+ player.userId +'/'), function() {
 						var p = player;
 						return function(json)
 						{
@@ -333,9 +330,19 @@ DiceFriendsPlugin = {
 						}
 					}()
 				);
-				//BBLog.getJSONFromBattlelog("http://battlelog.battlefield.com/bf3/servers/show/"+ player.serverGuid +"/", this.callbackWithParam(this.parseServer, player));
+				//BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'), this.callbackWithParam(this.parseServer, player));
 			}
 		}
+	},
+	
+	makeLocalizedUrl : function(path)
+	{
+		var url = "";
+		if(Surface.urlContext._language != 'en')
+			url = '/bf3/' + Surface.urlContext._language + path;
+		else
+			url = '/bf3' + path;
+		return url;
 	}
 
 }
@@ -344,4 +351,3 @@ $(document).ready(function() {
 	DiceFriendsPlugin.init();
 	DiceFriendsPlugin.update();
 })
-
