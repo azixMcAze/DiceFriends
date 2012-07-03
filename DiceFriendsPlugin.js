@@ -31,7 +31,7 @@ either expressed or implied, of the FreeBSD Project.
 * DiceFriends, a plugin for Better Battlelog that adds the playing Dice employees to your comcenter.
 *
 * @author Mathieu Le Ber
-* @version 1.0
+* @version 1.0.1
 * @date 30.06.2012
 * @url https://github.com/azixMcAze/DiceFriends
 */
