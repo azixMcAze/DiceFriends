@@ -31,8 +31,8 @@ either expressed or implied, of the FreeBSD Project.
 * DiceFriends, a plugin for Better Battlelog that adds the playing Dice employees to your comcenter.
 *
 * @author azixMcAze
-* @version 1.0.2
-* @date 05.07.2012
+* @version 1.0.3
+* @date 07.07.2012
 * @url https://github.com/azixMcAze/DiceFriends
 *
 * Released under the BSD License.
@@ -321,16 +321,8 @@ DiceFriendsPlugin = {
 				}
 				
 				this.playerList.push(player);
-				var self = this;
-				BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/user/overviewBoxStats/'+ player.userId +'/'), function() {
-						var p = player;
-						return function(json)
-						{
-							self.parseUser(json, p);
-						}
-					}()
-				);
-				//BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'), this.callbackWithParam(this.parseServer, player));
+				BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/user/overviewBoxStats/'+ player.userId +'/'), this.makeCallbackWithParam(this.parseUser, player));
+				//BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'), this.makeCallbackWithParam(this.parseServer, player));
 			}
 		}
 	},
@@ -343,8 +335,16 @@ DiceFriendsPlugin = {
 		else
 			url = '/bf3' + path;
 		return url;
+	},
+	
+	makeCallbackWithParam  : function(f, param)
+	{
+		var p = param;
+		var self = this;
+		return function(json) {
+			f.call(self, json, p);
+		}
 	}
-
 }
 
 $(document).ready(function() {
