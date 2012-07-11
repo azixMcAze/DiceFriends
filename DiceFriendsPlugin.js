@@ -32,7 +32,7 @@ either expressed or implied, of the FreeBSD Project.
 *
 * @author azixMcAze
 * @version 1.0.3
-* @date 07.07.2012
+* @date 11.07.2012
 * @url https://github.com/azixMcAze/DiceFriends
 *
 * Released under the BSD License.
@@ -48,9 +48,10 @@ DiceFriendsPlugin = {
 	{
 		// add a hook to the refresh function of the comcenter friend list to redraw the dice friend list whenever needed
 		var friendListSurface = $S("comcenter-surface-friends");
-		friendListSurface.oldRender = friendListSurface.render;
-		friendListSurface.render = function(o,b,kwargs) { var ret = this.oldRender(o,b,kwargs); DiceFriendsPlugin.displayPlayerList(); return ret;}
-
+		friendListSurface.oldUpdate = friendListSurface.update;
+		friendListSurface.update = function(itemState, opts) { var ret = this.oldUpdate(itemState, opts); DiceFriendsPlugin.displayPlayerList(); return ret;}
+		friendListSurface.oldRefresh = friendListSurface.refresh;
+		friendListSurface.refresh = function() { var ret = this.oldRefresh(); DiceFriendsPlugin.displayPlayerList(); return ret;}
 		
 		// create a style node to append the new css style for the dogtag button
 		$('head').append($('<style>').attr('type', 'text/css').text(
