@@ -46,10 +46,11 @@ DiceFriendsPlugin = {
 	
 	init : function()
 	{
-		// add a hook to the refresh function of the comcenter friend list to redraw the dice friend list
+		// add a hook to the refresh function of the comcenter friend list to redraw the dice friend list whenever needed
 		var friendListSurface = $S("comcenter-surface-friends");
-		friendListSurface.oldRefresh = friendListSurface.refresh;
-		friendListSurface.refresh = function() { var ret = this.oldRefresh(); DiceFriendsPlugin.displayPlayerList(); return ret;}
+		friendListSurface.oldRender = friendListSurface.render;
+		friendListSurface.render = function(o,b,kwargs) { var ret = this.oldRender(o,b,kwargs); DiceFriendsPlugin.displayPlayerList(); return ret;}
+
 		
 		// create a style node to append the new css style for the dogtag button
 		$('head').append($('<style>').attr('type', 'text/css').text(
@@ -337,9 +338,8 @@ DiceFriendsPlugin = {
 		return url;
 	},
 	
-	makeCallbackWithParam  : function(f, param)
+	makeCallbackWithParam  : function(f, p)
 	{
-		var p = param;
 		var self = this;
 		return function(json) {
 			f.call(self, json, p);
