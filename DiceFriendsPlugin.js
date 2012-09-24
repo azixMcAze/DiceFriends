@@ -31,8 +31,8 @@ either expressed or implied, of the FreeBSD Project.
 * DiceFriends, a plugin for Better Battlelog that adds the playing Dice employees to your comcenter.
 *
 * @author azixMcAze
-* @version 1.0.3
-* @date 11.07.2012
+* @version 1.0.4
+* @date 24.09.2012
 * @url https://github.com/azixMcAze/DiceFriends
 *
 * Released under the BSD License.
@@ -310,7 +310,7 @@ DiceFriendsPlugin = {
 			var user = member.user;
 
 			// if player is member of the platoon (not only invited) and in a PC game
-			if(member.membershipLevel >= 4 && user.presence.isPlaying && user.presence.platform == 1 )
+			if(member.membershipLevel >= json.context.membershipLevels.MEMBER && user.presence.isPlaying && user.presence.platform == platforms.PC )
 			{
 				var player =
 				{
