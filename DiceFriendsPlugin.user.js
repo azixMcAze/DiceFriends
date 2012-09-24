@@ -1,3 +1,12 @@
+// ==UserScript==
+// @name        DiceFriends
+// @include     http://battlelog.battlefield.com/bf3/*
+// @exclude     http://battlelog.battlefield.com/bf3/gate/
+// @version     1
+// @grant       none
+// ==/UserScript==
+
+
 /*
 Copyright (c) 2012, azixMcAze
 All rights reserved.
@@ -98,12 +107,17 @@ DiceFriendsPlugin = {
 	{
 		this.playerList = [];
 
-		BBLog.getJSONFromBattlelog(this.makeLocalizedUrl(this.dicePlatoon), function(json){
+		this.getJSONFromBattlelog(this.makeLocalizedUrl(this.dicePlatoon), function(json){
 			DiceFriendsPlugin.parsePlatoonMembers(json);
 			DiceFriendsPlugin.displayPlayerList();
 		});
 	},
 	
+	getJSONFromBattlelog : function(url, callback)
+	{
+		$.ajax({url:url, dataType:"json", success:callback, headers:{'X-AjaxNavigation': 1}	});
+	},
+
 	displayComcenterSeparator : function(playerCount)
 	{
 		$('#comcenterDiceFriends').append(
@@ -323,8 +337,8 @@ DiceFriendsPlugin = {
 				}
 				
 				this.playerList.push(player);
-				BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/user/overviewBoxStats/'+ player.userId +'/'), this.makeCallbackWithParam(this.parseUser, player));
-				//BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'), this.makeCallbackWithParam(this.parseServer, player));
+				this.getJSONFromBattlelog(this.makeLocalizedUrl('/user/overviewBoxStats/'+ player.userId +'/'), this.makeCallbackWithParam(this.parseUser, player));
+				//this.getJSONFromBattlelog(this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'), this.makeCallbackWithParam(this.parseServer, player));
 			}
 		}
 	},
