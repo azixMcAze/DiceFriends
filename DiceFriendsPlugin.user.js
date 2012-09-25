@@ -1,11 +1,14 @@
 // ==UserScript==
 // @name        DiceFriends
+// @author      azixMcAze
+// @description Allows you to view playing DICE employees in the Battlelog comcenter
+// @license     2-clause BSD license
+// @copyright   2012, azixMcAze
 // @include     http://battlelog.battlefield.com/bf3/*
 // @exclude     http://battlelog.battlefield.com/bf3/gate/
-// @version     1
+// @version     1.0.4
 // @grant       none
 // ==/UserScript==
-
 
 /*
 Copyright (c) 2012, azixMcAze
@@ -34,17 +37,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies, 
 either expressed or implied, of the FreeBSD Project.
-*/
-
-/*
-* DiceFriends, a plugin for Better Battlelog that adds the playing Dice employees to your comcenter.
-*
-* @author azixMcAze
-* @version 1.0.3
-* @date 11.07.2012
-* @url https://github.com/azixMcAze/DiceFriends
-*
-* Released under the BSD License.
 */
 
 DiceFriendsPlugin = {
