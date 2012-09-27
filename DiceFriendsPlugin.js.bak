@@ -72,6 +72,16 @@ DiceFriendsPlugin = {
 				margin-left: 5px;\n\
 				float: left;\n\
 			}\n\
+			.comcenter-dogtag-icon-dicefriend-overlay {\n\
+				background: url(http://battlelog-cdn.battlefield.com/public/profile/profile-icons.png?v=6860) no-repeat scroll -15px 0 transparent;\n\
+				background-position: -0px -168px;\n\
+				position: relative;\n\
+				width: 14px;\n\
+				height: 14px;\n\
+				margin: 0;\n\
+				filter: alpha(opacity=20);\n\
+				opacity: .2;\n\
+			}\n\
 			body.fullwidth .comcenter-interact-dogtag-icon {\n\
 				background-position: -70px -56px;\n\
 			}\n\
@@ -207,7 +217,9 @@ DiceFriendsPlugin = {
 					$('<a>').attr('title', '')
 							.attr('href', this.makeLocalizedUrl('/soldier/' + player.name + '/dogtags/' + player.personaId + '/'))
 							.addClass('bubble-title-left comcenter-interact-dogtag-parent').append(
-						$('<span>').addClass('comcenter-interact-dogtag-icon')
+						$('<span>').addClass('comcenter-interact-dogtag-icon').append(
+							$('<div>').addClass('comcenter-dogtag-icon-dicefriend-overlay')
+						)
 					)
 				)
 			)
