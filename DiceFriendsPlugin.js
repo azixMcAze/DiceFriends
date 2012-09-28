@@ -40,7 +40,7 @@ either expressed or implied, of the FreeBSD Project.
 
 DiceFriendsPlugin = {
 	playerList : [],
-	updateInterval : 60*5,
+	updateInterval : 60*2.5,
 	huntDiceData : "http://www.furydivine.net/api/hunt-dice/active/",
 	showingDiceFriends : true,
 	platformIcon : { "pc" : "common-game-2-1", "xbox" : "common-game-2-2", "ps3" : "common-game-2-4"},
