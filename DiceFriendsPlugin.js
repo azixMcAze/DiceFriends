@@ -43,9 +43,14 @@ DiceFriendsPlugin = {
 	updateInterval : 60*5,
 	dicePlatoon : "/platoon/2832655391300702826/listmembers/",
 	showingDiceFriends : true,
-	
+	platformIcon : {},
+
 	init : function()
 	{
+		this.platformIcon[platforms.PC] = "common-game-2-1";
+		this.platformIcon[platforms.XBOX360] = "common-game-2-2";
+		this.platformIcon[platforms.PS3] = "common-game-2-4";
+
 		// add a hook to the refresh function of the comcenter friend list to redraw the dice friend list whenever needed
 		var friendListSurface = $S("comcenter-surface-friends");
 		friendListSurface.oldUpdate = friendListSurface.update;
@@ -65,7 +70,7 @@ DiceFriendsPlugin = {
 			.comcenter-interact-dogtag-icon {\n\
 				width: 14px;\n\
 				height: 14px;\n\
-				background: url(http://battlelog-cdn.battlefield.com/public/profile/profile-icons.png?v=6860) no-repeat scroll -15px 0 transparent;\n\
+				background: url(http://battlelog-cdn.battlefield.com/public/profile/profile-icons.png) no-repeat scroll -15px 0 transparent;\n\
 				background-position: -42px -56px;\n\
 				margin-top: 6px;\n\
 				margin-left: 5px;\n\
@@ -86,6 +91,49 @@ DiceFriendsPlugin = {
 			.only-dev-dogtag {\n\
 				opacity: .4;\n\
 				filter: alpha(opacity=40);\n\
+			}\n\
+			.comcenter-interact-empty\n\
+			{\n\
+				height:24px;\n\
+				width:23px;\n\
+				float:right;\n\
+				margin-top:6px;\n\
+			}\n\
+			.comcenter-username .fake_a\n\
+			{\n\
+				white-space:nowrap;\n\
+				width:132px;\n\
+				text-overflow:ellipsis;\n\
+				overflow:hidden;\n\
+			}\n\
+			.comcenter-interact-settings\n\
+			{\n\
+				width: 24px;\n\
+				height: 24px;\n\
+				display: inline-block;\n\
+				position: absolute;\n\
+				right: 12px;\n\
+				top: -4px;\n\
+				opacity: .4;\n\
+				filter: alpha(opacity=40);\n\
+			}\n\
+			.comcenter-interact-settings-icon\n\
+			{\n\
+				width: 14px;\n\
+				height: 14px;\n\
+				background: url(http://battlelog-cdn.battlefield.com/public/profile/profile-icons.png) no-repeat scroll -15px 0 transparent;\n\
+				background-position: -28px -42px;\n\
+				margin-left: 5px;\n\
+				margin-top: 5px;\n\
+			}\n\
+			.comcenter-separator:hover .comcenter-interact-settings\n\
+			{\n\
+				opacity: 1;\n\
+				filter: alpha(opacity=100);\n\
+			}\n\
+			.comcenter-interact-settings:hover .comcenter-interact-settings-icon\n\
+			{\n\
+				background-position: -14px -42px;\n\
 			}\n\
 			'
 		));
@@ -113,9 +161,22 @@ DiceFriendsPlugin = {
 				$('<surf:container>').attr('id', 'comcenterDiceFriends').append(
 					$('<span>').text(playerCount.toString() + ' Dice friend' + (playerCount != 1 ? 's' : ''))
 				)
+			).append(
+				$('<div>').attr('id', 'comcenter-dicefriends-settings').addClass('comcenter-interact-settings').append(
+					$('<div>').addClass('comcenter-interact-settings-icon')
+				)
 			)
 		);
 		
+		// add the handler to open the settings
+		$("#comcenter-dicefriends-settings").bind("click", function (e) {
+			popupHtml = $('<div>').addClass('bblog-pop-cont');
+
+			BBLog.modalWindow('Dice Friends options', popupHtml.html());
+			e.stopPropagation()
+		});
+
+
 		// add the click handler to collapse the list
 		$("#comcenter-dicefriends-separator").bind("click", function (e) {
 			var bar = $("#comcenter-dicefriends-separator");
@@ -130,6 +191,7 @@ DiceFriendsPlugin = {
 			}
 			comcenter.resizeComCenter();
 		});
+
 	},
 
 	displayPlayer : function(player, separatorValue)
@@ -156,20 +218,34 @@ DiceFriendsPlugin = {
 						.text(player.name)).append(
 					$('<div>').addClass('comcenter-username-serverinfo').append(
 						$('<div>').addClass('base-left').append(
+							$('<span>').addClass('comcenter-full-height common-gameicon-hori bright comcenter-game-icon')
+									   .addClass(this.platformIcon[player.platform])
+						).append(
+							$('<span>').addClass('comcenter-small-height common-gameicon-hori comcenter-game-icon')
+									   .addClass(this.platformIcon[player.platform])
+						)).append(
+						$('<div>').addClass('base-left').append(
 							$('<span>').addClass('common-playing-link').append(
-								$('<a>').attr('title', player.serverName)
-										.addClass('common-playing-link base-no-ajax comcenter-playing-link').attr('href', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'))
-										.text(player.serverName)
+								player.serverGuid ?
+									($('<a>').attr('title', player.serverName)
+											.addClass('common-playing-link base-no-ajax comcenter-playing-link').attr('href', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'))
+											.text(player.serverName))
+								:
+									($('<span>').addClass('common-playing-link base-no-ajax comcenter-playing-link fake_a').text(player.serverName))
 							)
 						)
 					)
 				)).append(
 				$('<div>').addClass('comcenter-interact-container').append(
-					$('<form>').addClass('join-friend').attr('method', 'POST').attr('action', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/')).append(
-						$('<input>').attr('type', 'hidden').attr('name', 'game').attr('value', 2)).append(
-						$('<input>').attr('type', 'hidden').attr('name', 'guid').attr('value', player.serverGuid)).append(
-						$('<div>').attr('title', 'Join Game').addClass('bubble-title-left join-friend-submit-link comcenter-interact-playing')
-					)).append(
+					player.serverGuid ?
+						$('<form>').addClass('join-friend').attr('method', 'POST').attr('action', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/')).append(
+							$('<input>').attr('type', 'hidden').attr('name', 'game').attr('value', 2)).append(
+							$('<input>').attr('type', 'hidden').attr('name', 'guid').attr('value', player.serverGuid)).append(
+							$('<div>').attr('title', 'Join Game').addClass('bubble-title-left join-friend-submit-link comcenter-interact-playing')
+						)
+					:
+						$('<div>').addClass('bubble-title-left join-friend-submit-link comcenter-interact-empty'))
+				.append(
 					$('<a>').attr('title', '')
 							.attr('href', this.makeLocalizedUrl('/soldier/' + player.name + '/dogtags/' + player.personaId + '/'))
 							.addClass('bubble-title-left comcenter-interact-dogtag-parent').append(
@@ -236,49 +312,48 @@ DiceFriendsPlugin = {
 	{
 		var dogtagDiv = $('#comcenter-' + player.userId + ' .comcenter-interact-dogtag-parent');
 	
-		if(player.hasDiceDogtag)
+		if(player.hasDiceFriendDogtag)
 		{
-			if(player.hasDevDogtag)
-			{
-				dogtagDiv.attr('title', 'Dice & Dev Dogtags');
-				dogtagDiv.removeClass('no-dice-dogtag');
-				dogtagDiv.removeClass('only-dev-dogtag');
-			}
-			else
-			{
-				dogtagDiv.attr('title', 'Only Dice Dogtag');
-				dogtagDiv.removeClass('no-dice-dogtag');
-				dogtagDiv.removeClass('only-dev-dogtag');
-			}
+			dogtagDiv.attr('title', 'Dice Friend Dogtag');
+			dogtagDiv.removeClass('no-dice-dogtag');
+			dogtagDiv.removeClass('only-dev-dogtag');
 		}
 		else
 		{
-			if(player.hasDevDogtag)
+			if(player.hasDiceDogtag)
 			{
-				dogtagDiv.attr('title', 'Only Dev Dogtag');
-				dogtagDiv.removeClass('no-dice-dogtag');
-				dogtagDiv.addClass('only-dev-dogtag');
+				if(player.hasDevDogtag)
+				{
+					dogtagDiv.attr('title', 'Dice & Dev Dogtags');
+					dogtagDiv.removeClass('no-dice-dogtag');
+					dogtagDiv.removeClass('only-dev-dogtag');
+				}
+				else
+				{
+					dogtagDiv.attr('title', 'Only Dice Dogtag');
+					dogtagDiv.removeClass('no-dice-dogtag');
+					dogtagDiv.removeClass('only-dev-dogtag');
+				}
 			}
 			else
 			{
-				dogtagDiv.attr('title', 'No Dice Dogtags');
-				dogtagDiv.addClass('no-dice-dogtag');
-				dogtagDiv.removeClass('only-dev-dogtag');
+				if(player.hasDevDogtag)
+				{
+					dogtagDiv.attr('title', 'Only Dev Dogtag');
+					dogtagDiv.removeClass('no-dice-dogtag');
+					dogtagDiv.addClass('only-dev-dogtag');
+				}
+				else
+				{
+					dogtagDiv.attr('title', 'No Dice Dogtags');
+					dogtagDiv.addClass('no-dice-dogtag');
+					dogtagDiv.removeClass('only-dev-dogtag');
+				}
 			}
 		}
 	},
 
-/*
-	parseServer : function(json, player)
-	{
-		var server = json.context.server;
-		player.serverIp = server.ip;
-		player.serverPort = server.port;
-		player.serverGameId = server.gameId;
-		player.serverGame = server.game;
-		this.updateServerDisplay(player);
-	},
-*/
+
 	parseUser : function(json, player)
 	{
 		var soldiersBox = json.data.soldiersBox;
@@ -292,6 +367,7 @@ DiceFriendsPlugin = {
 				{
 					player.hasDiceDogtag = (dogtags.basicDogTag.nameSID == "ID_DT_N_DTB090_CAMPAIGN");
 					player.hasDevDogtag = (dogtags.advancedDogTag.nameSID == "ID_DT_N_DTA_DICE");
+					player.hasDiceFriendDogtag = (dogtags.advancedDogTag.nameSID == "ID_DT_COMMUNITY_N_DOGTAG");
 				}
 				
 				this.updateDogtagDisplay(player);
@@ -310,7 +386,7 @@ DiceFriendsPlugin = {
 			var user = member.user;
 
 			// if player is member of the platoon (not only invited) and in a PC game
-			if(member.membershipLevel >= json.context.membershipLevels.MEMBER && user.presence.isPlaying && user.presence.platform == platforms.PC )
+			if(member.membershipLevel >= json.context.membershipLevels.MEMBER && user.presence.isPlaying )
 			{
 				var player =
 				{
@@ -318,6 +394,7 @@ DiceFriendsPlugin = {
 					userId : user.userId,
 					personaId : member.personaId,
 					userAvatar : user.gravatarMd5,
+					platform : user.presence.platform,
 					serverGuid : user.presence.serverGuid,
 					serverName : user.presence.serverName
 				}
