@@ -240,6 +240,8 @@ DiceFriendsPlugin = {
 		});
 
 		BBLog.storage('dicefriends-filters', DiceFriendsPlugin.options.filters);
+
+		DiceFriendsPlugin.update();
 	},
 
 	displayComcenterSeparator : function(playerCount)
@@ -485,7 +487,10 @@ DiceFriendsPlugin = {
 					serverGuid : user.presence.serverGuid,
 					serverName : user.presence.serverName ? user.presence.serverName : ""
 				}
-				
+
+				if(!this.filterPlayer(player))
+					continue;
+
 				this.playerList.push(player);
 				BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/user/overviewBoxStats/'+ player.userId +'/'), this.makeCallbackWithParam(this.parseUser, player));
 				//BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'), this.makeCallbackWithParam(this.parseServer, player));
@@ -493,6 +498,11 @@ DiceFriendsPlugin = {
 		}
 	},
 	
+	filterPlayer : function(player)
+	{
+		return this.options.filters[player.platform]
+	},
+
 	makeLocalizedUrl : function(path)
 	{
 		var url = "";
