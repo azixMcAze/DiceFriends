@@ -41,12 +41,12 @@ either expressed or implied, of the FreeBSD Project.
 DiceFriendsPlugin = {
 	playerList : [],
 	updateInterval : 60*5,
-	dicePlatoon : "/platoon/2832655391300702826/listmembers/",
+	dicePlatoon : '/platoon/2832655391300702826/listmembers/',
 	showingDiceFriends : true,
 	platformIcon : {
 		'pc' : 'common-game-2-1',
 		'xbox' : 'common-game-2-2',
-		'ps3' : "common-game-2-4"
+		'ps3' : 'common-game-2-4'
 	},
 	options : {
 		'filters' : {
@@ -67,7 +67,7 @@ DiceFriendsPlugin = {
 		this.platformTranslations[platforms.PS3] = 'ps3';
 
 		// add a hook to the refresh function of the comcenter friend list to redraw the dice friend list whenever needed
-		var friendListSurface = $S("comcenter-surface-friends");
+		var friendListSurface = $S('comcenter-surface-friends');
 		friendListSurface.oldUpdate = friendListSurface.update;
 		friendListSurface.update = function(itemState, opts) { var ret = this.oldUpdate(itemState, opts); DiceFriendsPlugin.displayPlayerList(); return ret;}
 		friendListSurface.oldRefresh = friendListSurface.refresh;
@@ -205,13 +205,13 @@ DiceFriendsPlugin = {
 			$('<input>').attr('type', 'button').addClass('orange bblog-button save').attr('value', "Apply and Save")
 		);
 
-		popupHtml.find('.checkbox').bind("click", function(e){
-			$(this).toggleClass("active");
+		popupHtml.find('.checkbox').bind('click', function(e){
+			$(this).toggleClass('active');
 		});
 
-		popupHtml.find('.save').bind("click", function(e){
+		popupHtml.find('.save').bind('click', function(e){
 			DiceFriendsPlugin.saveSettings(popupHtml);
-			$("#bblog-modal").hide();
+			$('#bblog-modal').hide();
 		});
 
 		BBLog.modalWindow('Dice Friends options', popupHtml);
@@ -245,10 +245,10 @@ DiceFriendsPlugin = {
 	displayComcenterSeparator : function(playerCount)
 	{
 		$('#comcenterDiceFriends').append(
-			$('<li>').attr('id', 'comcenter-dicefriends-separator').addClass("comcenter-separator showing-online").append(
+			$('<li>').attr('id', 'comcenter-dicefriends-separator').addClass('comcenter-separator showing-online').append(
 				$('<div>').addClass('dropdownicon'),
 				$('<surf:container>').attr('id', 'comcenterDiceFriends').append(
-					$('<span>').text(playerCount.toString() + ' Dice friend' + (playerCount != 1 ? 's' : ''))
+					$('<span>').text(playerCount.toString() + " Dice friend" + (playerCount != 1 ? "s" : ""))
 				),
 				$('<div>').attr('id', 'comcenter-dicefriends-settings')
 						  .addClass('comcenter-interact-settings bubble-title-left')
@@ -259,22 +259,22 @@ DiceFriendsPlugin = {
 		);
 		
 		// add the handler to open the settings
-		$("#comcenter-dicefriends-settings").bind("click", function (e) {
+		$('#comcenter-dicefriends-settings').bind('click', function (e) {
 			DiceFriendsPlugin.displaySettingsPopup();
 			e.stopPropagation()
 		});
 
 
 		// add the click handler to collapse the list
-		$("#comcenter-dicefriends-separator").bind("click", function (e) {
-			var bar = $("#comcenter-dicefriends-separator");
-			if (bar.hasClass("showing-online")) {
-				bar.removeClass("showing-online");
-				$(".comcenter-dicefriend-online").addClass("comcenter-friend-hidden");
+		$('#comcenter-dicefriends-separator').bind('click', function (e) {
+			var bar = $('#comcenter-dicefriends-separator');
+			if (bar.hasClass('showing-online')) {
+				bar.removeClass('showing-online');
+				$('.comcenter-dicefriend-online').addClass('comcenter-friend-hidden');
 				DiceFriendsPlugin.showingDiceFriends = false;
 			} else {
-				bar.addClass("showing-online");
-				$(".comcenter-dicefriend-online").removeClass("comcenter-friend-hidden");
+				bar.addClass('showing-online');
+				$('.comcenter-dicefriend-online').removeClass('comcenter-friend-hidden');
 				DiceFriendsPlugin.showingDiceFriends = true;
 			}
 			comcenter.resizeComCenter();
@@ -328,7 +328,7 @@ DiceFriendsPlugin = {
 						$('<form>').addClass('join-friend').attr('method', 'POST').attr('action', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/')).append(
 							$('<input>').attr('type', 'hidden').attr('name', 'game').attr('value', 2),
 							$('<input>').attr('type', 'hidden').attr('name', 'guid').attr('value', player.serverGuid),
-							$('<div>').attr('title', 'Join Game').addClass('bubble-title-left join-friend-submit-link comcenter-interact-playing')
+							$('<div>').attr('title', "Join Game").addClass('bubble-title-left join-friend-submit-link comcenter-interact-playing')
 						)
 					:
 						$('<div>').addClass('bubble-title-left join-friend-submit-link comcenter-interact-empty')
@@ -377,8 +377,8 @@ DiceFriendsPlugin = {
 		// collapse the dice friend list if it was previously collapsed
 		if(!this.showingDiceFriends)
 		{
-			$("#comcenter-dicefriends-separator").removeClass("showing-online");
-			$(".comcenter-dicefriend-online").addClass("comcenter-friend-hidden");
+			$('#comcenter-dicefriends-separator').removeClass('showing-online');
+			$('.comcenter-dicefriend-online').addClass('comcenter-friend-hidden');
 		}
 		
 		// ask battlelog to resize the comcenter
@@ -389,7 +389,7 @@ DiceFriendsPlugin = {
 		Disabled, this element is rendered by battlelog after my hook has been called, overwriting my modifications
 		
 		// add playing dice friend count to the friend count in the taskbar of compact com center
-		var a = $(".comcenter-button-info");
+		var a = $('.comcenter-button-info');
 		a.text(a.text() + " - " + this.playerList.length.toString() + " dice");
 		*/
 	},
@@ -401,7 +401,7 @@ DiceFriendsPlugin = {
 	
 		if(player.hasDiceFriendDogtag)
 		{
-			dogtagDiv.attr('title', 'Dice Friend Dogtag');
+			dogtagDiv.attr('title', "Dice Friend Dogtag");
 			dogtagDiv.removeClass('no-dice-dogtag');
 			dogtagDiv.removeClass('only-dev-dogtag');
 		}
@@ -411,13 +411,13 @@ DiceFriendsPlugin = {
 			{
 				if(player.hasDevDogtag)
 				{
-					dogtagDiv.attr('title', 'Dice & Dev Dogtags');
+					dogtagDiv.attr('title', "Dice & Dev Dogtags");
 					dogtagDiv.removeClass('no-dice-dogtag');
 					dogtagDiv.removeClass('only-dev-dogtag');
 				}
 				else
 				{
-					dogtagDiv.attr('title', 'Only Dice Dogtag');
+					dogtagDiv.attr('title', "Only Dice Dogtag");
 					dogtagDiv.removeClass('no-dice-dogtag');
 					dogtagDiv.removeClass('only-dev-dogtag');
 				}
@@ -426,13 +426,13 @@ DiceFriendsPlugin = {
 			{
 				if(player.hasDevDogtag)
 				{
-					dogtagDiv.attr('title', 'Only Dev Dogtag');
+					dogtagDiv.attr('title', "Only Dev Dogtag");
 					dogtagDiv.removeClass('no-dice-dogtag');
 					dogtagDiv.addClass('only-dev-dogtag');
 				}
 				else
 				{
-					dogtagDiv.attr('title', 'No Dice Dogtags');
+					dogtagDiv.attr('title', "No Dice Dogtags");
 					dogtagDiv.addClass('no-dice-dogtag');
 					dogtagDiv.removeClass('only-dev-dogtag');
 				}
@@ -452,9 +452,9 @@ DiceFriendsPlugin = {
 				var dogtags = soldier.dogtagsForPersona[player.personaId];
 				if(dogtags)
 				{
-					player.hasDiceDogtag = (dogtags.basicDogTag.nameSID == "ID_DT_N_DTB090_CAMPAIGN");
-					player.hasDevDogtag = (dogtags.advancedDogTag.nameSID == "ID_DT_N_DTA_DICE");
-					player.hasDiceFriendDogtag = (dogtags.advancedDogTag.nameSID == "ID_DT_COMMUNITY_N_DOGTAG");
+					player.hasDiceDogtag = (dogtags.basicDogTag.nameSID == 'ID_DT_N_DTB090_CAMPAIGN');
+					player.hasDevDogtag = (dogtags.advancedDogTag.nameSID == 'ID_DT_N_DTA_DICE');
+					player.hasDiceFriendDogtag = (dogtags.advancedDogTag.nameSID == 'ID_DT_COMMUNITY_N_DOGTAG');
 				}
 				
 				this.updateDogtagDisplay(player);
