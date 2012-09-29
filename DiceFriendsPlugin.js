@@ -43,13 +43,28 @@ DiceFriendsPlugin = {
 	updateInterval : 60*5,
 	dicePlatoon : "/platoon/2832655391300702826/listmembers/",
 	showingDiceFriends : true,
-	platformIcon : {},
+	platformIcon : {
+		'pc' : 'common-game-2-1',
+		'xbox' : 'common-game-2-2',
+		'ps3' : "common-game-2-4"
+	},
+	options : {
+		'filters' : {
+			'pc' : true,
+			'xbox' : false,
+			'ps3' : false,
+			'dice' : true,
+			'dev' : true,
+			'dicefriend' : false
+		}
+	},
+	platformTranslations : {},
 
 	init : function()
 	{
-		this.platformIcon[platforms.PC] = "common-game-2-1";
-		this.platformIcon[platforms.XBOX360] = "common-game-2-2";
-		this.platformIcon[platforms.PS3] = "common-game-2-4";
+		this.platformTranslations[platforms.PC] = 'pc';
+		this.platformTranslations[platforms.XBOX360] = 'xbox';
+		this.platformTranslations[platforms.PS3] = 'ps3';
 
 		// add a hook to the refresh function of the comcenter friend list to redraw the dice friend list whenever needed
 		var friendListSurface = $S("comcenter-surface-friends");
@@ -114,6 +129,7 @@ DiceFriendsPlugin = {
 				position: absolute;\n\
 				right: 12px;\n\
 				top: -4px;\n\
+				cursor: pointer;\n\
 				opacity: .4;\n\
 				filter: alpha(opacity=40);\n\
 			}\n\
@@ -131,15 +147,30 @@ DiceFriendsPlugin = {
 				opacity: 1;\n\
 				filter: alpha(opacity=100);\n\
 			}\n\
-			.comcenter-interact-settings:hover .comcenter-interact-settings-icon\n\
+			body.fullwidth .comcenter-interact-settings:hover .comcenter-interact-settings-icon\n\
 			{\n\
 				background-position: -14px -42px;\n\
+			}\n\
+			.comcenter-interact-settings:hover .comcenter-interact-settings-icon\n\
+			{\n\
+				background-position: 0px -42px;\n\
+			}\n\
+			.dicefriends-settings-column\n\
+			{\n\
+				width: 220px;\n\
+				float: left;\n\
+				padding-bottom: 10px;\n\
 			}\n\
 			'
 		));
 		
 		// set a timer to update the friend list periodically
 		setInterval(function(){ DiceFriendsPlugin.update(); }, this.updateInterval * 1000);
+
+		// load settings from BBLog's persistent storage
+		filters = BBLog.storage('dicefriends-filters');
+		if(filters)
+			this.options.filters = filters;
 	},
 	
 	update : function()
@@ -152,6 +183,65 @@ DiceFriendsPlugin = {
 		});
 	},
 	
+	displaySettingsPopup : function()
+	{
+		popupHtml = $('<div>').addClass('bblog-pop-cont bblog-options').append(
+			$('<h2>').addClass('bblog-title').text('Filter players'),
+			$('<div>').addClass('').append(
+				$('<div>').addClass('dicefriends-settings-column').append(
+					$('<h3>').text("By platform"),
+					this.displaySettingsOption("PC", 'pc'),
+					this.displaySettingsOption("XBOX 360", 'xbox'),
+					this.displaySettingsOption("PS3", 'ps3')
+				),
+				$('<div>').addClass('dicefriends-settings-column').append(
+					$('<h3>').text("By dogtag"),
+					this.displaySettingsOption("DICE dogtag", 'dice'),
+					this.displaySettingsOption("Dev Team dogtag", 'dev'),
+					this.displaySettingsOption("DICE Friend dogtag", 'dicefriend')
+				)
+			),
+			$('<p>').addClass('clear'),
+			$('<input>').attr('type', 'button').addClass('orange bblog-button save').attr('value', "Apply and Save")
+		);
+
+		popupHtml.find('.checkbox').bind("click", function(e){
+			$(this).toggleClass("active");
+		});
+
+		popupHtml.find('.save').bind("click", function(e){
+			DiceFriendsPlugin.saveSettings(popupHtml);
+			$("#bblog-modal").hide();
+		});
+
+		BBLog.modalWindow('Dice Friends options', popupHtml);
+	},
+
+	displaySettingsOption : function(name, dataKey)
+	{
+		settingHtml = $('<div>').addClass('entry').append(			
+			$('<div>').addClass('checkbox').attr('data-key', dataKey),
+			$('<span>').addClass('text').text(name)
+		)
+
+		if(this.options.filters[dataKey])
+		{
+			settingHtml.find('.checkbox').addClass('active');
+		}
+
+		return settingHtml;
+	},
+
+	saveSettings : function(popupHtml)
+	{
+		popupHtml.find('.checkbox').each(function(index, element) {
+			elt = $(element);
+			DiceFriendsPlugin.options.filters[elt.attr('data-key')] = elt.hasClass('active');
+		});
+
+		BBLog.storage('dicefriends-filters', DiceFriendsPlugin.options.filters);
+	},
+
 	displayComcenterSeparator : function(playerCount)
 	{
 		$('#comcenterDiceFriends').append(
@@ -160,7 +250,9 @@ DiceFriendsPlugin = {
 				$('<surf:container>').attr('id', 'comcenterDiceFriends').append(
 					$('<span>').text(playerCount.toString() + ' Dice friend' + (playerCount != 1 ? 's' : ''))
 				),
-				$('<div>').attr('id', 'comcenter-dicefriends-settings').addClass('comcenter-interact-settings').append(
+				$('<div>').attr('id', 'comcenter-dicefriends-settings')
+						  .addClass('comcenter-interact-settings bubble-title-left')
+						  .attr('title', "Open Settings").append(
 					$('<div>').addClass('comcenter-interact-settings-icon')
 				)
 			)
@@ -168,9 +260,7 @@ DiceFriendsPlugin = {
 		
 		// add the handler to open the settings
 		$("#comcenter-dicefriends-settings").bind("click", function (e) {
-			popupHtml = $('<div>').addClass('bblog-pop-cont');
-
-			BBLog.modalWindow('Dice Friends options', popupHtml.html());
+			DiceFriendsPlugin.displaySettingsPopup();
 			e.stopPropagation()
 		});
 
@@ -391,7 +481,7 @@ DiceFriendsPlugin = {
 					userId : user.userId,
 					personaId : member.personaId,
 					userAvatar : user.gravatarMd5,
-					platform : user.presence.platform,
+					platform : this.platformTranslations[user.presence.platform],
 					serverGuid : user.presence.serverGuid,
 					serverName : user.presence.serverName ? user.presence.serverName : ""
 				}
