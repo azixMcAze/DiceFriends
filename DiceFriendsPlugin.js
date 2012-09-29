@@ -48,7 +48,7 @@ DiceFriendsPlugin = {
 		'xbox' : 'common-game-2-2',
 		'ps3' : 'common-game-2-4'
 	},
-	options : {
+	settings : {
 		'filters' : {
 			'pc' : true,
 			'xbox' : false,
@@ -171,7 +171,7 @@ DiceFriendsPlugin = {
 		// load settings from BBLog's persistent storage
 		filters = BBLog.storage('dicefriends-filters');
 		if(filters)
-			this.options.filters = filters;
+			this.settings.filters = filters;
 	},
 	
 	update : function()
@@ -221,7 +221,7 @@ DiceFriendsPlugin = {
 			$('#bblog-modal').hide();
 		});
 
-		BBLog.modalWindow('Dice Friends options', popupHtml);
+		BBLog.modalWindow('Dice Friends settings', popupHtml);
 	},
 
 	displaySettingsOption : function(name, dataKey)
@@ -231,7 +231,7 @@ DiceFriendsPlugin = {
 			$('<span>').addClass('text').text(name)
 		)
 
-		if(this.options.filters[dataKey])
+		if(this.settings.filters[dataKey])
 		{
 			settingHtml.find('.checkbox').addClass('active');
 		}
@@ -243,10 +243,10 @@ DiceFriendsPlugin = {
 	{
 		popupHtml.find('.checkbox').each(function(index, element) {
 			elt = $(element);
-			DiceFriendsPlugin.options.filters[elt.attr('data-key')] = elt.hasClass('active');
+			DiceFriendsPlugin.settings.filters[elt.attr('data-key')] = elt.hasClass('active');
 		});
 
-		BBLog.storage('dicefriends-filters', DiceFriendsPlugin.options.filters);
+		BBLog.storage('dicefriends-filters', DiceFriendsPlugin.settings.filters);
 
 		DiceFriendsPlugin.update();
 	},
@@ -288,7 +288,6 @@ DiceFriendsPlugin = {
 			}
 			comcenter.resizeComCenter();
 		});
-
 	},
 
 	displayPlayer : function(player, separatorValue)
@@ -495,14 +494,14 @@ DiceFriendsPlugin = {
 		for(dogtag in player.hasDogtag)
 		{
 			hasDogtag = player.hasDogtag[dogtag];
-			filterdogtag = this.options.filters[dogtag];
+			filterdogtag = this.settings.filters[dogtag];
 
 			// if a player has a dogtag that is to be displayed
 			if(hasDogtag && filterdogtag)
 				filterForDogtags = true;
 		}
 
-		filterForPlatform = this.options.filters[player.platform]
+		filterForPlatform = this.settings.filters[player.platform]
 		return filterForDogtags && filterForPlatform
 	},
 
