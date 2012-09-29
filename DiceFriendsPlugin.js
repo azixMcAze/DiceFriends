@@ -156,12 +156,10 @@ DiceFriendsPlugin = {
 	{
 		$('#comcenterDiceFriends').append(
 			$('<li>').attr('id', 'comcenter-dicefriends-separator').addClass("comcenter-separator showing-online").append(
-				$('<div>').addClass('dropdownicon')
-			).append(
+				$('<div>').addClass('dropdownicon'),
 				$('<surf:container>').attr('id', 'comcenterDiceFriends').append(
 					$('<span>').text(playerCount.toString() + ' Dice friend' + (playerCount != 1 ? 's' : ''))
-				)
-			).append(
+				),
 				$('<div>').attr('id', 'comcenter-dicefriends-settings').addClass('comcenter-interact-settings').append(
 					$('<div>').addClass('comcenter-interact-settings-icon')
 				)
@@ -203,7 +201,7 @@ DiceFriendsPlugin = {
 					 .addClass('comcenter-friend-item comcenter-friend comcenter-friend-playing comcenter-dicefriend-online') // comcenter-friend-online
 					 .attr('rel', player.userId)
 					 .append(
-				$('<div>').addClass('comcenter-friend-draggable-dummy')).append(
+				$('<div>').addClass('comcenter-friend-draggable-dummy'),
 				$('<div>').addClass('comcenter-avatar').append(
 					$('<div>').attr('rel', player.userId).addClass('base-avatar-container base-avatar-size-small').append(
 						$('<div>').addClass('base-avatar-status-overlay base-avatar-status-overlay-playing').append(
@@ -212,40 +210,39 @@ DiceFriendsPlugin = {
 									  .attr('height', 22)
 						)
 					)
-				)).append(
+				),
 				$('<div>').addClass('comcenter-username').append(
-					$('<a>').addClass('comcenter-username-link').attr('href', this.makeLocalizedUrl('/user/'+ player.name +'/'))
-						.text(player.name)).append(
+					$('<a>').addClass('comcenter-username-link').attr('href', this.makeLocalizedUrl('/user/'+ player.name +'/')).text(player.name),
 					$('<div>').addClass('comcenter-username-serverinfo').append(
 						$('<div>').addClass('base-left').append(
 							$('<span>').addClass('comcenter-full-height common-gameicon-hori bright comcenter-game-icon')
-									   .addClass(this.platformIcon[player.platform])
-						).append(
+									   .addClass(this.platformIcon[player.platform]),
 							$('<span>').addClass('comcenter-small-height common-gameicon-hori comcenter-game-icon')
 									   .addClass(this.platformIcon[player.platform])
-						)).append(
+						),
 						$('<div>').addClass('base-left').append(
 							$('<span>').addClass('common-playing-link').append(
-								player.serverGuid ?
+								(player.serverGuid ?
 									($('<a>').attr('title', player.serverName)
 											.addClass('common-playing-link base-no-ajax comcenter-playing-link').attr('href', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'))
 											.text(player.serverName))
 								:
 									($('<span>').addClass('common-playing-link base-no-ajax comcenter-playing-link fake_a').text(player.serverName))
+								)
 							)
 						)
 					)
-				)).append(
+				),
 				$('<div>').addClass('comcenter-interact-container').append(
-					player.serverGuid ?
+					(player.serverGuid ?
 						$('<form>').addClass('join-friend').attr('method', 'POST').attr('action', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/')).append(
-							$('<input>').attr('type', 'hidden').attr('name', 'game').attr('value', 2)).append(
-							$('<input>').attr('type', 'hidden').attr('name', 'guid').attr('value', player.serverGuid)).append(
+							$('<input>').attr('type', 'hidden').attr('name', 'game').attr('value', 2),
+							$('<input>').attr('type', 'hidden').attr('name', 'guid').attr('value', player.serverGuid),
 							$('<div>').attr('title', 'Join Game').addClass('bubble-title-left join-friend-submit-link comcenter-interact-playing')
 						)
 					:
-						$('<div>').addClass('bubble-title-left join-friend-submit-link comcenter-interact-empty'))
-				.append(
+						$('<div>').addClass('bubble-title-left join-friend-submit-link comcenter-interact-empty')
+					),
 					$('<a>').attr('title', '')
 							.attr('href', this.makeLocalizedUrl('/soldier/' + player.name + '/dogtags/' + player.personaId + '/'))
 							.addClass('bubble-title-left comcenter-interact-dogtag-parent').append(
@@ -396,7 +393,7 @@ DiceFriendsPlugin = {
 					userAvatar : user.gravatarMd5,
 					platform : user.presence.platform,
 					serverGuid : user.presence.serverGuid,
-					serverName : user.presence.serverName
+					serverName : user.presence.serverName ? user.presence.serverName : ""
 				}
 				
 				this.playerList.push(player);
