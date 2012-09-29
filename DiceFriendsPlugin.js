@@ -194,14 +194,15 @@ DiceFriendsPlugin = {
 					this.displaySettingsOption("PC", 'pc'),
 					this.displaySettingsOption("XBOX 360", 'xbox'),
 					this.displaySettingsOption("PS3", 'ps3')
-				),
+				)
+				/*,
 				$('<div>').addClass('dicefriends-settings-column').append(
 					$('<h3>').text("Show by dogtag"),
 					this.displaySettingsOption("DICE dogtag", 'dice'),
 					this.displaySettingsOption("Dev Team dogtag", 'dev'),
 					this.displaySettingsOption("DICE Friend dogtag", 'dicefriend'),
 					this.displaySettingsOption("Other dogtags", 'other')
-				)
+				)*/
 			),
 			$('<p>').addClass('clear'),
 			$('<input>').attr('type', 'button').addClass('orange bblog-button save').attr('value', "Apply and Save")
