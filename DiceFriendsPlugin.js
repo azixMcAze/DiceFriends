@@ -31,7 +31,7 @@ either expressed or implied, of the FreeBSD Project.
 * DiceFriends, a plugin for Better Battlelog that adds the playing Dice employees to your comcenter.
 *
 * @author azixMcAze
-* @version 1.0.4
+* @version 1.1.1
 * @date 24.09.2012
 * @url https://github.com/azixMcAze/DiceFriends
 *
@@ -48,14 +48,15 @@ DiceFriendsPlugin = {
 		'xbox' : 'common-game-2-2',
 		'ps3' : 'common-game-2-4'
 	},
-	options : {
+	settings : {
 		'filters' : {
 			'pc' : true,
 			'xbox' : false,
 			'ps3' : false,
 			'dice' : true,
 			'dev' : true,
-			'dicefriend' : false
+			'dicefriend' : true,
+			'other_dogtags' : true
 		}
 	},
 	platformTranslations : {},
@@ -170,7 +171,7 @@ DiceFriendsPlugin = {
 		// load settings from BBLog's persistent storage
 		filters = BBLog.storage('dicefriends-filters');
 		if(filters)
-			this.options.filters = filters;
+			this.settings.filters = filters;
 	},
 	
 	update : function()
@@ -189,16 +190,17 @@ DiceFriendsPlugin = {
 			$('<h2>').addClass('bblog-title').text('Filter players'),
 			$('<div>').addClass('').append(
 				$('<div>').addClass('dicefriends-settings-column').append(
-					$('<h3>').text("By platform"),
+					$('<h3>').text("Show by platform"),
 					this.displaySettingsOption("PC", 'pc'),
 					this.displaySettingsOption("XBOX 360", 'xbox'),
 					this.displaySettingsOption("PS3", 'ps3')
 				),
 				$('<div>').addClass('dicefriends-settings-column').append(
-					$('<h3>').text("By dogtag"),
+					$('<h3>').text("Show by dogtag"),
 					this.displaySettingsOption("DICE dogtag", 'dice'),
 					this.displaySettingsOption("Dev Team dogtag", 'dev'),
-					this.displaySettingsOption("DICE Friend dogtag", 'dicefriend')
+					this.displaySettingsOption("DICE Friend dogtag", 'dicefriend'),
+					this.displaySettingsOption("Other dogtags", 'other')
 				)
 			),
 			$('<p>').addClass('clear'),
@@ -214,7 +216,7 @@ DiceFriendsPlugin = {
 			$('#bblog-modal').hide();
 		});
 
-		BBLog.modalWindow('Dice Friends options', popupHtml);
+		BBLog.modalWindow('Dice Friends settings', popupHtml);
 	},
 
 	displaySettingsOption : function(name, dataKey)
@@ -224,7 +226,7 @@ DiceFriendsPlugin = {
 			$('<span>').addClass('text').text(name)
 		)
 
-		if(this.options.filters[dataKey])
+		if(this.settings.filters[dataKey])
 		{
 			settingHtml.find('.checkbox').addClass('active');
 		}
@@ -236,10 +238,10 @@ DiceFriendsPlugin = {
 	{
 		popupHtml.find('.checkbox').each(function(index, element) {
 			elt = $(element);
-			DiceFriendsPlugin.options.filters[elt.attr('data-key')] = elt.hasClass('active');
+			DiceFriendsPlugin.settings.filters[elt.attr('data-key')] = elt.hasClass('active');
 		});
 
-		BBLog.storage('dicefriends-filters', DiceFriendsPlugin.options.filters);
+		BBLog.storage('dicefriends-filters', DiceFriendsPlugin.settings.filters);
 
 		DiceFriendsPlugin.update();
 	},
@@ -281,7 +283,6 @@ DiceFriendsPlugin = {
 			}
 			comcenter.resizeComCenter();
 		});
-
 	},
 
 	displayPlayer : function(player, separatorValue)
@@ -401,7 +402,7 @@ DiceFriendsPlugin = {
 	{
 		var dogtagDiv = $('#comcenter-' + player.userId + ' .comcenter-interact-dogtag-parent');
 	
-		if(player.hasDiceFriendDogtag)
+		if(player.hasDogtag.dicefriend)
 		{
 			dogtagDiv.attr('title', "Dice Friend Dogtag");
 			dogtagDiv.removeClass('no-dice-dogtag');
@@ -409,9 +410,9 @@ DiceFriendsPlugin = {
 		}
 		else
 		{
-			if(player.hasDiceDogtag)
+			if(player.hasDogtag.dice)
 			{
-				if(player.hasDevDogtag)
+				if(player.hasDogtag.dev)
 				{
 					dogtagDiv.attr('title', "Dice & Dev Dogtags");
 					dogtagDiv.removeClass('no-dice-dogtag');
@@ -426,7 +427,7 @@ DiceFriendsPlugin = {
 			}
 			else
 			{
-				if(player.hasDevDogtag)
+				if(player.hasDogtag.dev)
 				{
 					dogtagDiv.attr('title', "Only Dev Dogtag");
 					dogtagDiv.removeClass('no-dice-dogtag');
@@ -454,9 +455,12 @@ DiceFriendsPlugin = {
 				var dogtags = soldier.dogtagsForPersona[player.personaId];
 				if(dogtags)
 				{
-					player.hasDiceDogtag = (dogtags.basicDogTag.nameSID == 'ID_DT_N_DTB090_CAMPAIGN');
-					player.hasDevDogtag = (dogtags.advancedDogTag.nameSID == 'ID_DT_N_DTA_DICE');
-					player.hasDiceFriendDogtag = (dogtags.advancedDogTag.nameSID == 'ID_DT_COMMUNITY_N_DOGTAG');
+					player.hasDogtag = {
+						dice : dogtags.basicDogTag.nameSID == "ID_DT_N_DTB090_CAMPAIGN",
+						dev : dogtags.advancedDogTag.nameSID == "ID_DT_N_DTA_DICE",
+						dicefriend : dogtags.advancedDogTag.nameSID == 'ID_DT_COMMUNITY_N_DOGTAG'
+					}
+
 				}
 				
 				this.updateDogtagDisplay(player);
@@ -485,7 +489,8 @@ DiceFriendsPlugin = {
 					userAvatar : user.gravatarMd5,
 					platform : this.platformTranslations[user.presence.platform],
 					serverGuid : user.presence.serverGuid,
-					serverName : user.presence.serverName ? user.presence.serverName : ""
+					serverName : user.presence.serverName ? user.presence.serverName : "",
+					hasDogtag : {}
 				}
 
 				if(!this.filterPlayer(player))
@@ -498,9 +503,10 @@ DiceFriendsPlugin = {
 		}
 	},
 	
+	// filters player according to settings. true = display player
 	filterPlayer : function(player)
 	{
-		return this.options.filters[player.platform]
+		return this.settings.filters[player.platform]
 	},
 
 	makeLocalizedUrl : function(path)
