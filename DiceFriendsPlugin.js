@@ -55,7 +55,8 @@ DiceFriendsPlugin = {
 			'ps3' : false,
 			'dice' : true,
 			'dev' : true,
-			'dicefriend' : false
+			'dicefriend' : true,
+			'other_dogtags' : true
 		}
 	},
 	platformTranslations : {},
@@ -194,16 +195,17 @@ DiceFriendsPlugin = {
 			$('<h2>').addClass('bblog-title').text('Filter players'),
 			$('<div>').addClass('').append(
 				$('<div>').addClass('dicefriends-settings-column').append(
-					$('<h3>').text("By platform"),
+					$('<h3>').text("Show by platform"),
 					this.displaySettingsOption("PC", 'pc'),
 					this.displaySettingsOption("XBOX 360", 'xbox'),
 					this.displaySettingsOption("PS3", 'ps3')
 				),
 				$('<div>').addClass('dicefriends-settings-column').append(
-					$('<h3>').text("By dogtag"),
+					$('<h3>').text("Show by dogtag"),
 					this.displaySettingsOption("DICE dogtag", 'dice'),
 					this.displaySettingsOption("Dev Team dogtag", 'dev'),
-					this.displaySettingsOption("DICE Friend dogtag", 'dicefriend')
+					this.displaySettingsOption("DICE Friend dogtag", 'dicefriend'),
+					this.displaySettingsOption("Other dogtags", 'other')
 				)
 			),
 			$('<p>').addClass('clear'),
@@ -406,7 +408,7 @@ DiceFriendsPlugin = {
 	{
 		var dogtagDiv = $('#comcenter-' + player.userId + ' .comcenter-interact-dogtag-parent');
 	
-		if(player.hasDiceFriendDogtag)
+		if(player.hasDogtag.dicefriend)
 		{
 			dogtagDiv.attr('title', "Dice Friend Dogtag");
 			dogtagDiv.removeClass('no-dice-dogtag');
@@ -414,9 +416,9 @@ DiceFriendsPlugin = {
 		}
 		else
 		{
-			if(player.hasDiceDogtag)
+			if(player.hasDogtag.dice)
 			{
-				if(player.hasDevDogtag)
+				if(player.hasDogtag.dev)
 				{
 					dogtagDiv.attr('title', "Dice & Dev Dogtags");
 					dogtagDiv.removeClass('no-dice-dogtag');
@@ -431,7 +433,7 @@ DiceFriendsPlugin = {
 			}
 			else
 			{
-				if(player.hasDevDogtag)
+				if(player.hasDogtag.dev)
 				{
 					dogtagDiv.attr('title', "Only Dev Dogtag");
 					dogtagDiv.removeClass('no-dice-dogtag');
@@ -469,11 +471,15 @@ DiceFriendsPlugin = {
 					serverGuid : user.onlineStatus.serverGUID,
 					serverName : user.onlineStatus.serverName,
 					platform : user.profile.namespace,
-					hasDiceDogtag : user.dogTags.left.nameSID == "ID_DT_N_DTB090_CAMPAIGN",
-					hasDevDogtag : user.dogTags.right.nameSID == "ID_DT_N_DTA_DICE",
-					hasDiceFriendDogtag : user.dogTags.right.nameSID == 'ID_DT_COMMUNITY_N_DOGTAG'
+					hasDogtag : {
+						dice : user.dogTags.left.nameSID == "ID_DT_N_DTB090_CAMPAIGN",
+						dev : user.dogTags.right.nameSID == "ID_DT_N_DTA_DICE",
+						dicefriend : user.dogTags.right.nameSID == 'ID_DT_COMMUNITY_N_DOGTAG'
+					}
 				}
-
+				
+				player.hasDogtag.other = !(player.hasDogtag.dice || player.hasDogtag.dev || player.hasDogtag.dicefriend)
+				
 				if(!this.filterPlayer(player))
 					continue;
 
@@ -482,9 +488,22 @@ DiceFriendsPlugin = {
 		}
 	},
 	
+	// filters player according to settings. true = display player
 	filterPlayer : function(player)
 	{
-		return this.options.filters[player.platform]
+		filterForDogtags = false;
+		for(dogtag in player.hasDogtag)
+		{
+			hasDogtag = player.hasDogtag[dogtag];
+			filterdogtag = this.options.filters[dogtag];
+
+			// if a player has a dogtag that is to be displayed
+			if(hasDogtag && filterdogtag)
+				filterForDogtags = true;
+		}
+
+		filterForPlatform = this.options.filters[player.platform]
+		return filterForDogtags && filterForPlatform
 	},
 
 	makeLocalizedUrl : function(path)
