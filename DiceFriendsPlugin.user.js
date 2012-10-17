@@ -6,7 +6,7 @@
 // @copyright   2012, azixMcAze
 // @include     http://battlelog.battlefield.com/bf3/*
 // @exclude     http://battlelog.battlefield.com/bf3/gate/
-// @version     1.0.4
+// @version     1.0.5
 // @grant       none
 // ==/UserScript==
 
@@ -44,9 +44,19 @@ DiceFriendsPlugin = {
 	updateInterval : 60*5,
 	dicePlatoon : "/platoon/2832655391300702826/listmembers/",
 	showingDiceFriends : true,
-	
+	platformIcon : {
+		'pc' : 'common-game-2-1',
+		'xbox' : 'common-game-2-2',
+		'ps3' : 'common-game-2-4'
+	},
+	platformTranslations : {},
+
 	init : function()
 	{
+		this.platformTranslations[platforms.PC] = 'pc';
+		this.platformTranslations[platforms.XBOX360] = 'xbox';
+		this.platformTranslations[platforms.PS3] = 'ps3';
+
 		// add a hook to the refresh function of the comcenter friend list to redraw the dice friend list whenever needed
 		var friendListSurface = $S("comcenter-surface-friends");
 		friendListSurface.oldUpdate = friendListSurface.update;
@@ -66,7 +76,7 @@ DiceFriendsPlugin = {
 			.comcenter-interact-dogtag-icon {\n\
 				width: 14px;\n\
 				height: 14px;\n\
-				background: url(http://battlelog-cdn.battlefield.com/public/profile/profile-icons.png?v=6860) no-repeat scroll -15px 0 transparent;\n\
+				background: url(http://battlelog-cdn.battlefield.com/public/profile/profile-icons.png) no-repeat scroll -15px 0 transparent;\n\
 				background-position: -42px -56px;\n\
 				margin-top: 6px;\n\
 				margin-left: 5px;\n\
@@ -147,7 +157,7 @@ DiceFriendsPlugin = {
 					 .addClass('comcenter-friend-item comcenter-friend comcenter-friend-playing comcenter-dicefriend-online') // comcenter-friend-online
 					 .attr('rel', player.userId)
 					 .append(
-				$('<div>').addClass('comcenter-friend-draggable-dummy')).append(
+				$('<div>').addClass('comcenter-friend-draggable-dummy'),
 				$('<div>').addClass('comcenter-avatar').append(
 					$('<div>').attr('rel', player.userId).addClass('base-avatar-container base-avatar-size-small').append(
 						$('<div>').addClass('base-avatar-status-overlay base-avatar-status-overlay-playing').append(
@@ -156,26 +166,34 @@ DiceFriendsPlugin = {
 									  .attr('height', 22)
 						)
 					)
-				)).append(
+				),
 				$('<div>').addClass('comcenter-username').append(
-					$('<a>').addClass('comcenter-username-link').attr('href', this.makeLocalizedUrl('/user/'+ player.name +'/'))
-						.text(player.name)).append(
+					$('<a>').addClass('comcenter-username-link')
+							.attr('data-profile', '/bf3/user/'+ player.name +'/')
+							.text(player.name),
 					$('<div>').addClass('comcenter-username-serverinfo').append(
-						$('<div>').addClass('base-left').append(
-							$('<span>').addClass('common-playing-link').append(
-								$('<a>').attr('title', player.serverName)
-										.addClass('common-playing-link base-no-ajax comcenter-playing-link').attr('href', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'))
-										.text(player.serverName)
+						$('<span>').addClass('comcenter-full-height common-gameicon-hori bright comcenter-game-icon')
+								   .addClass(this.platformIcon[player.platform]),
+						$('<span>').addClass('comcenter-small-height common-gameicon-hori comcenter-game-icon')
+								   .addClass(this.platformIcon[player.platform]),
+						$('<span>').addClass('common-playing-link').append(
+							(player.serverGuid ?
+								($('<a>').attr('title', player.serverName)
+										.addClass('common-playing-link base-no-ajax comcenter-playing-link')
+										.attr('href', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'))
+										.text(player.serverName))
+							:
+								($('<span>').addClass('common-playing-link base-no-ajax comcenter-playing-link fake_a').text(player.serverName))
 							)
 						)
 					)
-				)).append(
+				),
 				$('<div>').addClass('comcenter-interact-container').append(
 					$('<form>').addClass('join-friend').attr('method', 'POST').attr('action', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/')).append(
-						$('<input>').attr('type', 'hidden').attr('name', 'game').attr('value', 2)).append(
-						$('<input>').attr('type', 'hidden').attr('name', 'guid').attr('value', player.serverGuid)).append(
-						$('<div>').attr('title', 'Join Game').addClass('bubble-title-left join-friend-submit-link comcenter-interact-playing')
-					)).append(
+						$('<input>').attr('type', 'hidden').attr('name', 'game').attr('value', 2),
+						$('<input>').attr('type', 'hidden').attr('name', 'guid').attr('value', player.serverGuid),
+						$('<div>').attr('title', "Join Game").addClass('bubble-title-left join-friend-submit-link comcenter-interact-playing')
+					),
 					$('<a>').attr('title', '')
 							.attr('href', this.makeLocalizedUrl('/soldier/' + player.name + '/dogtags/' + player.personaId + '/'))
 							.addClass('bubble-title-left comcenter-interact-dogtag-parent').append(
@@ -242,9 +260,9 @@ DiceFriendsPlugin = {
 	{
 		var dogtagDiv = $('#comcenter-' + player.userId + ' .comcenter-interact-dogtag-parent');
 	
-		if(player.hasDiceDogtag)
+		if(player.hasDogtag.dice)
 		{
-			if(player.hasDevDogtag)
+			if(player.hasDogtag.dev)
 			{
 				dogtagDiv.attr('title', 'Dice & Dev Dogtags');
 				dogtagDiv.removeClass('no-dice-dogtag');
@@ -259,7 +277,7 @@ DiceFriendsPlugin = {
 		}
 		else
 		{
-			if(player.hasDevDogtag)
+			if(player.hasDogtag.dev)
 			{
 				dogtagDiv.attr('title', 'Only Dev Dogtag');
 				dogtagDiv.removeClass('no-dice-dogtag');
@@ -293,12 +311,9 @@ DiceFriendsPlugin = {
 			var soldier = json.data.soldiersBox[i];
 			if(soldier.persona.personaId == player.personaId)
 			{
-				var dogtags = soldier.dogtagsForPersona[player.personaId];
-				if(dogtags)
-				{
-					player.hasDiceDogtag = (dogtags.basicDogTag.nameSID == "ID_DT_N_DTB090_CAMPAIGN");
-					player.hasDevDogtag = (dogtags.advancedDogTag.nameSID == "ID_DT_N_DTA_DICE");
-				}
+				var dogtags = soldier.dogtagsForPersona
+				player.hasDogtag.dice = dogtags.basicDogTag.nameSID == "BF3_ID_DT_N_DTB090_CAMPAIGN";
+				player.hasDogtag.dev = dogtags.advancedDogTag.nameSID == "BF3_ID_DT_N_DTA_DICE";
 				
 				this.updateDogtagDisplay(player);
 				return;
@@ -316,7 +331,7 @@ DiceFriendsPlugin = {
 			var user = member.user;
 
 			// if player is member of the platoon (not only invited) and in a PC game
-			if(member.membershipLevel >= 4 && user.presence.isPlaying && user.presence.platform == 1 )
+			if(member.membershipLevel >= json.context.membershipLevels.MEMBER && user.presence.isPlaying && user.presence.platform == platforms.PC )
 			{
 				var player =
 				{
@@ -324,8 +339,10 @@ DiceFriendsPlugin = {
 					userId : user.userId,
 					personaId : member.personaId,
 					userAvatar : user.gravatarMd5,
+					platform : this.platformTranslations[user.presence.platform],
 					serverGuid : user.presence.serverGuid,
-					serverName : user.presence.serverName
+					serverName : user.presence.serverName,
+					hasDogtag : {}
 				}
 				
 				this.playerList.push(player);
