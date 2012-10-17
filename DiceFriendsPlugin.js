@@ -31,8 +31,8 @@ either expressed or implied, of the FreeBSD Project.
 * DiceFriends, a plugin for Better Battlelog that adds the playing Dice employees to your comcenter.
 *
 * @author azixMcAze
-* @version 1.1.1
-* @date 24.09.2012
+* @version 1.1.2
+* @date 17.10.2012
 * @url https://github.com/azixMcAze/DiceFriends
 *
 * Released under the BSD License.
@@ -306,23 +306,22 @@ DiceFriendsPlugin = {
 					)
 				),
 				$('<div>').addClass('comcenter-username').append(
-					$('<a>').addClass('comcenter-username-link').attr('href', this.makeLocalizedUrl('/user/'+ player.name +'/')).text(player.name),
+					$('<a>').addClass('comcenter-username-link')
+							.attr('data-profile', '/bf3/user/'+ player.name +'/')
+							.text(player.name),
 					$('<div>').addClass('comcenter-username-serverinfo').append(
-						$('<div>').addClass('base-left').append(
-							$('<span>').addClass('comcenter-full-height common-gameicon-hori bright comcenter-game-icon')
-									   .addClass(this.platformIcon[player.platform]),
-							$('<span>').addClass('comcenter-small-height common-gameicon-hori comcenter-game-icon')
-									   .addClass(this.platformIcon[player.platform])
-						),
-						$('<div>').addClass('base-left').append(
-							$('<span>').addClass('common-playing-link').append(
-								(player.serverGuid ?
-									($('<a>').attr('title', player.serverName)
-											.addClass('common-playing-link base-no-ajax comcenter-playing-link').attr('href', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'))
-											.text(player.serverName))
-								:
-									($('<span>').addClass('common-playing-link base-no-ajax comcenter-playing-link fake_a').text(player.serverName))
-								)
+						$('<span>').addClass('comcenter-full-height common-gameicon-hori bright comcenter-game-icon')
+								   .addClass(this.platformIcon[player.platform]),
+						$('<span>').addClass('comcenter-small-height common-gameicon-hori comcenter-game-icon')
+								   .addClass(this.platformIcon[player.platform]),
+						$('<span>').addClass('common-playing-link').append(
+							(player.serverGuid ?
+								($('<a>').attr('title', player.serverName)
+										.addClass('common-playing-link base-no-ajax comcenter-playing-link')
+										.attr('href', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'))
+										.text(player.serverName))
+							:
+								($('<span>').addClass('common-playing-link base-no-ajax comcenter-playing-link fake_a').text(player.serverName))
 							)
 						)
 					)
@@ -447,22 +446,17 @@ DiceFriendsPlugin = {
 
 	parseUser : function(json, player)
 	{
+
 		var soldiersBox = json.data.soldiersBox;
 		for(var i in soldiersBox)
 		{
 			var soldier = json.data.soldiersBox[i];
 			if(soldier.persona.personaId == player.personaId)
 			{
-				var dogtags = soldier.dogtagsForPersona[player.personaId];
-				if(dogtags)
-				{
-					player.hasDogtag = {
-						dice : dogtags.basicDogTag.nameSID == "ID_DT_N_DTB090_CAMPAIGN",
-						dev : dogtags.advancedDogTag.nameSID == "ID_DT_N_DTA_DICE",
-						dicefriend : dogtags.advancedDogTag.nameSID == 'ID_DT_COMMUNITY_N_DOGTAG'
-					}
-
-				}
+				var dogtags = soldier.dogtagsForPersona
+				player.hasDogtag.dice = dogtags.basicDogTag.nameSID == "BF3_ID_DT_N_DTB090_CAMPAIGN";
+				player.hasDogtag.dev = dogtags.advancedDogTag.nameSID == "BF3_ID_DT_N_DTA_DICE";
+				player.hasDogtag.dicefriend = dogtags.advancedDogTag.nameSID == 'BF3_ID_DT_COMMUNITY_N_DOGTAG';
 				
 				this.updateDogtagDisplay(player);
 				return;
