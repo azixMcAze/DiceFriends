@@ -31,8 +31,8 @@ either expressed or implied, of the FreeBSD Project.
 * DiceFriends, a plugin for Better Battlelog that adds the playing Dice employees to your comcenter.
 *
 * @author azixMcAze
-* @version 1.1.2
-* @date 17.10.2012
+* @version 1.1.3-platoon
+* @date 18.10.2012
 * @url https://github.com/azixMcAze/DiceFriends
 *
 * Released under the BSD License.
@@ -40,8 +40,7 @@ either expressed or implied, of the FreeBSD Project.
 
 DiceFriendsPlugin = {
 	playerList : [],
-	updateInterval : 60*5,
-	dicePlatoon : '/platoon/2832655391300702826/listmembers/',
+	updateInterval : 60*2.5,
 	showingDiceFriends : true,
 	platformIcon : {
 		'pc' : 'common-game-2-1',
@@ -56,8 +55,12 @@ DiceFriendsPlugin = {
 			'dice' : true,
 			'dev' : true,
 			'dicefriend' : true,
-			'other_dogtags' : true
-		}
+			'other_dogtags' : true,
+			'offline' : false,
+			'online' : true,
+			'playing' : true
+		},
+		'platoon' : '2832655391300702826'
 	},
 	platformTranslations : {},
 
@@ -171,14 +174,26 @@ DiceFriendsPlugin = {
 		// load settings from BBLog's persistent storage
 		filters = BBLog.storage('dicefriends-filters');
 		if(filters)
-			this.settings.filters = filters;
+		{
+			for(var filter in filters)
+			{
+				this.settings.filters[filter] = filters[filter];
+			}
+		}
+
+		platoon = BBLog.storage('dicefriends-platoon');
+		if(platoon)
+		{
+			this.settings.platoon = platoon;
+		}
+
 	},
 	
 	update : function()
 	{
 		this.playerList = [];
 
-		BBLog.getJSONFromBattlelog(this.makeLocalizedUrl(this.dicePlatoon), function(json){
+		BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/platoon/' + this.settings.platoon + '/listmembers/'), function(json){
 			DiceFriendsPlugin.parsePlatoonMembers(json);
 			DiceFriendsPlugin.displayPlayerList();
 		});
@@ -186,23 +201,36 @@ DiceFriendsPlugin = {
 	
 	displaySettingsPopup : function()
 	{
-		popupHtml = $('<div>').addClass('bblog-pop-cont bblog-options').append(
+		popupHtml = $('<div>').addClass('bblog-pop-cont bblog-options bblog-plugins').append(
+			$('<h2>').addClass('bblog-title').text('Platoon'),
+			$('<div>').addClass('').append(
+				$('<label>').attr('for', 'dicefriends-settings-platoon').text('Platoon ID : '),
+				$('<input>').attr('id', 'dicefriends-settings-platoon').attr('type', 'text').attr('value', this.settings.platoon),
+				$("<p>Enter the number found in the platoon\'s page url</p>"),
+				$("<p>Example : http://battlelog.battlefield.com/bf3/platoon/<strong>2832655391300702826</strong>/ for the Official DICE Platoon</p>")
+			),
 			$('<h2>').addClass('bblog-title').text('Filter players'),
 			$('<div>').addClass('').append(
+				/*
 				$('<div>').addClass('dicefriends-settings-column').append(
 					$('<h3>').text("Show by platform"),
 					this.displaySettingsOption("PC", 'pc'),
 					this.displaySettingsOption("XBOX 360", 'xbox'),
 					this.displaySettingsOption("PS3", 'ps3')
-				)
-				/*,
-				$('<div>').addClass('dicefriends-settings-column').append(
+				),*/
+				/*$('<div>').addClass('dicefriends-settings-column').append(
 					$('<h3>').text("Show by dogtag"),
 					this.displaySettingsOption("DICE dogtag", 'dice'),
 					this.displaySettingsOption("Dev Team dogtag", 'dev'),
 					this.displaySettingsOption("DICE Friend dogtag", 'dicefriend'),
 					this.displaySettingsOption("Other dogtags", 'other')
-				)*/
+				),*/
+				$('<div>').addClass('dicefriends-settings-column').append(
+					$('<h3>').text("Show by presence"),
+					this.displaySettingsOption("Playing", 'playing'),
+					this.displaySettingsOption("Online", 'online'),
+					this.displaySettingsOption("Offline", 'offline')
+				)
 			),
 			$('<p>').addClass('clear'),
 			$('<input>').attr('type', 'button').addClass('orange bblog-button save').attr('value', "Apply and Save")
@@ -242,7 +270,11 @@ DiceFriendsPlugin = {
 			DiceFriendsPlugin.settings.filters[elt.attr('data-key')] = elt.hasClass('active');
 		});
 
+		DiceFriendsPlugin.settings.platoon = popupHtml.find('#dicefriends-settings-platoon').attr('value');
+		
+
 		BBLog.storage('dicefriends-filters', DiceFriendsPlugin.settings.filters);
+		BBLog.storage('dicefriends-platoon', DiceFriendsPlugin.settings.platoon);
 
 		DiceFriendsPlugin.update();
 	},
@@ -253,7 +285,7 @@ DiceFriendsPlugin = {
 			$('<li>').attr('id', 'comcenter-dicefriends-separator').addClass('comcenter-separator showing-online').append(
 				$('<div>').addClass('dropdownicon'),
 				$('<surf:container>').attr('id', 'comcenterDiceFriends').append(
-					$('<span>').text(playerCount.toString() + " Dice friend" + (playerCount != 1 ? "s" : ""))
+					$('<span>').text(playerCount.toString() + " Platoon friend" + (playerCount != 1 ? "s" : ""))
 				),
 				$('<div>').attr('id', 'comcenter-dicefriends-settings')
 						  .addClass('comcenter-interact-settings bubble-title-left')
@@ -283,6 +315,7 @@ DiceFriendsPlugin = {
 				DiceFriendsPlugin.showingDiceFriends = true;
 			}
 			comcenter.resizeComCenter();
+			comcenter.scrollableReinitialise();
 		});
 	},
 
@@ -292,13 +325,13 @@ DiceFriendsPlugin = {
 
 		playerContainer.append(
 			$('<li>').attr('id', 'comcenter-' + player.userId)
-					 .addClass('comcenter-friend-item comcenter-friend comcenter-friend-playing comcenter-dicefriend-online') // comcenter-friend-online
+					 .addClass('comcenter-friend-item comcenter-friend comcenter-dicefriend-online comcenter-friend-'+ player.presence)
 					 .attr('rel', player.userId)
 					 .append(
 				$('<div>').addClass('comcenter-friend-draggable-dummy'),
 				$('<div>').addClass('comcenter-avatar').append(
 					$('<div>').attr('rel', player.userId).addClass('base-avatar-container base-avatar-size-small').append(
-						$('<div>').addClass('base-avatar-status-overlay base-avatar-status-overlay-playing').append(
+						$('<div>').addClass('base-avatar-status-overlay base-avatar-status-overlay-' + player.presence).append(
 							$('<img>').attr('src', 'http://www.gravatar.com/avatar/'+ player.userAvatar +'?s=22&d=http%3A%2F%2Fbattlelog-cdn.battlefield.com%2Fpublic%2Fbase%2Fshared%2Fdefault-avatar-22.png%3Fv%3D7909')
 									  .attr('width', 22)
 									  .attr('height', 22)
@@ -309,21 +342,25 @@ DiceFriendsPlugin = {
 					$('<a>').addClass('comcenter-username-link')
 							.attr('data-profile', '/bf3/user/'+ player.name +'/')
 							.text(player.name),
-					$('<div>').addClass('comcenter-username-serverinfo').append(
-						$('<span>').addClass('comcenter-full-height common-gameicon-hori bright comcenter-game-icon')
-								   .addClass(this.platformIcon[player.platform]),
-						$('<span>').addClass('comcenter-small-height common-gameicon-hori comcenter-game-icon')
-								   .addClass(this.platformIcon[player.platform]),
-						$('<span>').addClass('common-playing-link').append(
-							(player.serverGuid ?
-								($('<a>').attr('title', player.serverName)
-										.addClass('common-playing-link base-no-ajax comcenter-playing-link')
-										.attr('href', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'))
-										.text(player.serverName))
-							:
-								($('<span>').addClass('common-playing-link base-no-ajax comcenter-playing-link fake_a').text(player.serverName))
+					(player.presence == 'playing' ?		
+						$('<div>').addClass('comcenter-username-serverinfo').append(
+							$('<span>').addClass('comcenter-full-height common-gameicon-hori bright comcenter-game-icon')
+									   .addClass(this.platformIcon[player.platform]),
+							$('<span>').addClass('comcenter-small-height common-gameicon-hori comcenter-game-icon')
+									   .addClass(this.platformIcon[player.platform]),
+							$('<span>').addClass('common-playing-link').append(
+								(player.serverGuid ?
+									($('<a>').attr('title', player.serverName)
+											.addClass('common-playing-link base-no-ajax comcenter-playing-link')
+											.attr('href', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'))
+											.text(player.serverName))
+								:
+									($('<span>').addClass('common-playing-link base-no-ajax comcenter-playing-link fake_a').text(player.serverName))
+								)
 							)
 						)
+					:
+						null
 					)
 				),
 				$('<div>').addClass('comcenter-interact-container').append(
@@ -370,6 +407,9 @@ DiceFriendsPlugin = {
 		// create the separator
 		this.displayComcenterSeparator(this.playerList.length);
 		
+		// sort player list by presence
+		this.sortPlayerList();
+
 		// display each player
 		for(var i in this.playerList)
 		{
@@ -386,6 +426,7 @@ DiceFriendsPlugin = {
 		
 		// ask battlelog to resize the comcenter
 		comcenter.resizeComCenter();
+		comcenter.scrollableReinitialise();
 		
 		
 		/*
@@ -397,6 +438,18 @@ DiceFriendsPlugin = {
 		*/
 	},
 
+
+	sortPlayerList : function()
+	{
+		presenceOrder = {
+			'playing' : 1,
+			'online' : 2,
+			'offline' : 3
+		}
+		this.playerList = this.playerList.sort(function(a,b) {
+			return presenceOrder[a.presence] - presenceOrder[b.presence];
+		});
+	},
 
 	updateDogtagDisplay : function(player)
 	{
@@ -474,13 +527,14 @@ DiceFriendsPlugin = {
 			var user = member.user;
 
 			// if player is member of the platoon (not only invited) and in a PC game
-			if(member.membershipLevel >= json.context.membershipLevels.MEMBER && user.presence.isPlaying )
+			if(member.membershipLevel >= json.context.membershipLevels.MEMBER )
 			{
 				var player =
 				{
 					name : user.username,
 					userId : user.userId,
 					personaId : member.personaId,
+					presence : user.presence.isPlaying ? 'playing' : (user.presence.isOnline ? 'online' : 'offline'),
 					userAvatar : user.gravatarMd5,
 					platform : this.platformTranslations[user.presence.platform],
 					serverGuid : user.presence.serverGuid,
@@ -492,7 +546,7 @@ DiceFriendsPlugin = {
 					continue;
 
 				this.playerList.push(player);
-				BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/user/overviewBoxStats/'+ player.userId +'/'), this.makeCallbackWithParam(this.parseUser, player));
+				//BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/user/overviewBoxStats/'+ player.userId +'/'), this.makeCallbackWithParam(this.parseUser, player));
 				//BBLog.getJSONFromBattlelog(this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/'), this.makeCallbackWithParam(this.parseServer, player));
 			}
 		}
@@ -501,7 +555,7 @@ DiceFriendsPlugin = {
 	// filters player according to settings. true = display player
 	filterPlayer : function(player)
 	{
-		return this.settings.filters[player.platform]
+		return this.settings.filters[player.presence];
 	},
 
 	makeLocalizedUrl : function(path)
