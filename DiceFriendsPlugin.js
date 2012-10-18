@@ -283,6 +283,7 @@ DiceFriendsPlugin = {
 				DiceFriendsPlugin.showingDiceFriends = true;
 			}
 			comcenter.resizeComCenter();
+			comcenter.scrollableReinitialise();
 		});
 	},
 
@@ -386,6 +387,7 @@ DiceFriendsPlugin = {
 		
 		// ask battlelog to resize the comcenter
 		comcenter.resizeComCenter();
+		comcenter.scrollableReinitialise();
 		
 		
 		/*
