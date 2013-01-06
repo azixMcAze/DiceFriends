@@ -178,12 +178,17 @@ DiceFriendsPlugin = {
 	{
 		this.playerList = [];
 
-		BBLog.getJSONFromBattlelog(this.makeLocalizedUrl(this.dicePlatoon), function(json){
+		this.getJSONFromBattlelog(this.makeLocalizedUrl(this.dicePlatoon), function(json){
 			DiceFriendsPlugin.parsePlatoonMembers(json);
 			DiceFriendsPlugin.displayPlayerList();
 		});
 	},
 	
+	getJSONFromBattlelog : function(url, callback)
+	{
+		$.ajax({url:url, dataType:"json", success:callback, headers:{'X-AjaxNavigation': 1}	});
+	},
+
 	displaySettingsPopup : function()
 	{
 		popupHtml = $('<div>').addClass('bblog-pop-cont bblog-options').append(
