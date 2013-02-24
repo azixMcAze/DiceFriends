@@ -156,11 +156,28 @@ DiceFriendsPlugin = {
 			{\n\
 				background-position: 0px -42px;\n\
 			}\n\
+			#popup-dicefriend-settings h2\n\
+			{\n\
+				font-weight: bold;\n\
+				color: #8A8A8A;\n\
+				text-shadow: none;\n\
+				float: left;\n\
+				font-size: 11px;\n\
+				margin-right: 0;\n\
+				margin-top: 12px;\n\
+				text-align: left;\n\
+				font-family: Tahoma,Arial,sans-serif;\n\
+				width: 100%;\n\
+				clear: both;\n\
+				position: relative;\n\
+				text-transform: uppercase;\n\
+			}\n\
 			.dicefriends-settings-column\n\
 			{\n\
 				width: 220px;\n\
 				float: left;\n\
 				padding-bottom: 10px;\n\
+				padding-left: 16px;\n\
 			}\n\
 			'
 		));
@@ -189,31 +206,69 @@ DiceFriendsPlugin = {
 		$.ajax({url:url, dataType:"jsonp", success:callback, jsonpCallback:"callback"});
 	},
 
+	getJSONFromBattlelog : function(url, callback)
+	{
+		$.ajax({url:url, dataType:"json", success:callback, headers:{'X-AjaxNavigation': 1}	});
+	},
+
+	displayPopup : function(title, contentHtml, callback)
+	{
+		var popupHtml = $('<div>').attr('id', 'popup-dicefriend-settings').addClass('common-popup medium common-popup-remove ui-draggable').attr('style', 'margin-left: -457px; margin-top: -169px; top: 50%; position: fixed; display: block; z-index: 1002;').append(
+			$('<div>').addClass('common-popup-title-container').append(
+				$('<div>').addClass('common-popup-title common-popup-handle')
+					.text(title).append(
+					$('<div>').addClass('common-popup-close-container').append(
+						$('<div>').addClass('common-popup-close').html("&nbsp;")
+					)
+				)
+			),
+			$('<div>').addClass('common-popup-content-container').append(
+				contentHtml
+			),
+			$('<div>').addClass('common-popup-footer-container').append(
+				$('<form>').attr('id', 'popup-dicefriend-settings-form').append(
+					$('<input>').attr('type', 'submit').attr('value', "Save").addClass('base-button-arrow-small')
+				)
+			)
+		)
+
+		popupHtml.find('form').bind('submit', function(e){
+			popup.closePopup("popup-dicefriend-settings");
+			if(callback)
+				callback();
+			return false;
+		});
+
+		popupHtml.appendTo(".base-center-popups");
+		popup.centerAndShowPopup(popupHtml);
+	},
+
 	displaySettingsPopup : function()
 	{
-		popupHtml = $('<div>').addClass('bblog-pop-cont bblog-options').append(
-			$('<h2>').addClass('bblog-title').text('Filter players'),
+		popupHtml = $('<div>').addClass('common-popup-content')
+			.append(
+			//$('<h1>').addClass('bblog-title').text('Filter players'),
 			$('<div>').addClass('').append(
 				$('<div>').addClass('dicefriends-settings-column').append(
-					$('<h3>').text("Show by platform"),
+					$('<h2>').text("Show by platform"),
 					this.displaySettingsOption("PC", 'pc'),
 					this.displaySettingsOption("XBOX 360", 'xbox'),
 					this.displaySettingsOption("PS3", 'ps3')
 				),
 				$('<div>').addClass('dicefriends-settings-column').append(
-					$('<h3>').text("Show by dogtag"),
+					$('<h2>').text("Show by dogtag"),
 					this.displaySettingsOption("DICE dogtag", 'dice'),
 					this.displaySettingsOption("Dev Team dogtag", 'dev'),
 					this.displaySettingsOption("DICE Friend dogtag", 'dicefriend'),
 					this.displaySettingsOption("Other dogtags", 'other')
 				)
 			),
-			$('<p>').addClass('clear'),
-			$('<input>').attr('type', 'button').addClass('orange bblog-button save').attr('value', "Apply and Save")
+			$('<p>').addClass('clear')//,
+			//$('<input>').attr('type', 'button').addClass('orange bblog-button save').attr('value', "Apply and Save")
 		);
 
-		popupHtml.find('.checkbox').bind('click', function(e){
-			$(this).toggleClass('active');
+		popupHtml.find('.entry').bind('click', function(e){
+			$(this).find('.bblog-checkbox').toggleClass('active');
 		});
 
 		popupHtml.find('.save').bind('click', function(e){
@@ -221,19 +276,22 @@ DiceFriendsPlugin = {
 			$('#bblog-modal').hide();
 		});
 
-		BBLog.modalWindow('Dice Friends settings', popupHtml);
+		this.displayPopup("Dice Friends settings", popupHtml, function(){
+			DiceFriendsPlugin.saveSettings(popupHtml);
+		});
+		//BBLog.modalWindow('Dice Friends settings', popupHtml);
 	},
 
 	displaySettingsOption : function(name, dataKey)
 	{
 		settingHtml = $('<div>').addClass('entry').append(			
-			$('<div>').addClass('checkbox').attr('data-key', dataKey),
+			$('<div>').addClass('bblog-checkbox').attr('data-key', dataKey),
 			$('<span>').addClass('text').text(name)
 		)
 
 		if(this.settings.filters[dataKey])
 		{
-			settingHtml.find('.checkbox').addClass('active');
+			settingHtml.find('.bblog-checkbox').addClass('active');
 		}
 
 		return settingHtml;
@@ -241,7 +299,7 @@ DiceFriendsPlugin = {
 
 	saveSettings : function(popupHtml)
 	{
-		popupHtml.find('.checkbox').each(function(index, element) {
+		popupHtml.find('.bblog-checkbox').each(function(index, element) {
 			elt = $(element);
 			DiceFriendsPlugin.settings.filters[elt.attr('data-key')] = elt.hasClass('active');
 		});
@@ -258,21 +316,21 @@ DiceFriendsPlugin = {
 				$('<div>').addClass('dropdownicon'),
 				$('<surf:container>').attr('id', 'comcenterDiceFriends').append(
 					$('<span>').text(playerCount.toString() + " Dice friend" + (playerCount != 1 ? "s" : ""))
-				)//,
-				// $('<div>').attr('id', 'comcenter-dicefriends-settings')
-				// 		  .attr('data-tooltip-position', "left")
-				// 		  .attr('data-tooltip', "Open Settings")
-				// 		  .addClass('comcenter-interact-settings').append(
-				// 	$('<div>').addClass('comcenter-interact-settings-icon')
-				// )
+				),
+				$('<div>').attr('id', 'comcenter-dicefriends-settings')
+						  .attr('data-tooltip-position', "left")
+						  .attr('data-tooltip', "Open Settings")
+						  .addClass('comcenter-interact-settings').append(
+					$('<div>').addClass('comcenter-interact-settings-icon')
+				)
 			)
 		);
 		
 		// add the handler to open the settings
-		// $('#comcenter-dicefriends-settings').bind('click', function (e) {
-		// 	DiceFriendsPlugin.displaySettingsPopup();
-		// 	e.stopPropagation()
-		// });
+		$('#comcenter-dicefriends-settings').bind('click', function (e) {
+			DiceFriendsPlugin.displaySettingsPopup();
+			e.stopPropagation()
+		});
 
 
 		// add the click handler to collapse the list
