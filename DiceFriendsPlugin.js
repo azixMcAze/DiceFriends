@@ -258,20 +258,21 @@ DiceFriendsPlugin = {
 				$('<div>').addClass('dropdownicon'),
 				$('<surf:container>').attr('id', 'comcenterDiceFriends').append(
 					$('<span>').text(playerCount.toString() + " Dice friend" + (playerCount != 1 ? "s" : ""))
-				),
-				$('<div>').attr('id', 'comcenter-dicefriends-settings')
-						  .addClass('comcenter-interact-settings bubble-title-left')
-						  .attr('title', "Open Settings").append(
-					$('<div>').addClass('comcenter-interact-settings-icon')
-				)
+				)//,
+				// $('<div>').attr('id', 'comcenter-dicefriends-settings')
+				// 		  .attr('data-tooltip-position', "left")
+				// 		  .attr('data-tooltip', "Open Settings")
+				// 		  .addClass('comcenter-interact-settings').append(
+				// 	$('<div>').addClass('comcenter-interact-settings-icon')
+				// )
 			)
 		);
 		
 		// add the handler to open the settings
-		$('#comcenter-dicefriends-settings').bind('click', function (e) {
-			DiceFriendsPlugin.displaySettingsPopup();
-			e.stopPropagation()
-		});
+		// $('#comcenter-dicefriends-settings').bind('click', function (e) {
+		// 	DiceFriendsPlugin.displaySettingsPopup();
+		// 	e.stopPropagation()
+		// });
 
 
 		// add the click handler to collapse the list
@@ -336,14 +337,16 @@ DiceFriendsPlugin = {
 						$('<form>').addClass('join-friend').attr('method', 'POST').attr('action', this.makeLocalizedUrl('/servers/show/'+ player.serverGuid +'/')).append(
 							$('<input>').attr('type', 'hidden').attr('name', 'game').attr('value', 2),
 							$('<input>').attr('type', 'hidden').attr('name', 'guid').attr('value', player.serverGuid),
-							$('<div>').attr('title', "Join Game").addClass('bubble-title-left join-friend-submit-link comcenter-interact-playing')
+							$('<div>').addClass('join-friend-submit-link comcenter-interact-playing')
+									  .attr('data-tooltip-position', "left")
+									  .attr('data-tooltip', "Join Game")
 						)
 					:
-						$('<div>').addClass('bubble-title-left join-friend-submit-link comcenter-interact-empty')
+						$('<div>').addClass('join-friend-submit-link comcenter-interact-empty')
 					),
-					$('<a>').attr('title', '')
+					$('<a>').attr('data-tooltip-position', "left").attr('data-tooltip', "")
 							.attr('href', this.makeLocalizedUrl('/soldier/' + player.name + '/dogtags/' + player.personaId + '/'))
-							.addClass('bubble-title-left comcenter-interact-dogtag-parent').append(
+							.addClass('comcenter-interact-dogtag-parent').append(
 						$('<span>').addClass('comcenter-interact-dogtag-icon')
 					)
 				)
@@ -410,7 +413,7 @@ DiceFriendsPlugin = {
 	
 		if(player.hasDogtag.dicefriend)
 		{
-			dogtagDiv.attr('title', "Dice Friend Dogtag");
+			dogtagDiv.attr('data-tooltip', "Dice Friend Dogtag");
 			dogtagDiv.removeClass('no-dice-dogtag');
 			dogtagDiv.removeClass('only-dev-dogtag');
 		}
@@ -420,13 +423,13 @@ DiceFriendsPlugin = {
 			{
 				if(player.hasDogtag.dev)
 				{
-					dogtagDiv.attr('title', "Dice & Dev Dogtags");
+					dogtagDiv.attr('data-tooltip', "Dice & Dev Dogtags");
 					dogtagDiv.removeClass('no-dice-dogtag');
 					dogtagDiv.removeClass('only-dev-dogtag');
 				}
 				else
 				{
-					dogtagDiv.attr('title', "Only Dice Dogtag");
+					dogtagDiv.attr('data-tooltip', "Only Dice Dogtag");
 					dogtagDiv.removeClass('no-dice-dogtag');
 					dogtagDiv.removeClass('only-dev-dogtag');
 				}
@@ -435,13 +438,13 @@ DiceFriendsPlugin = {
 			{
 				if(player.hasDogtag.dev)
 				{
-					dogtagDiv.attr('title', "Only Dev Dogtag");
+					dogtagDiv.attr('data-tooltip', "Only Dev Dogtag");
 					dogtagDiv.removeClass('no-dice-dogtag');
 					dogtagDiv.addClass('only-dev-dogtag');
 				}
 				else
 				{
-					dogtagDiv.attr('title', "No Dice Dogtags");
+					dogtagDiv.attr('data-tooltip', "No Dice Dogtags");
 					dogtagDiv.addClass('no-dice-dogtag');
 					dogtagDiv.removeClass('only-dev-dogtag');
 				}
